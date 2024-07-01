@@ -23,10 +23,21 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
     const lines = (await response.readBody()).split('\n')
 
+    if (lines.trim().length === 0) {
+      core.warning('tail: no logs, skipping sorry :/')
+      return
+    }
+
     for (const line of lines) {
       core.debug(`tail: recv ${line}`)
-      const [nextCursor, rawEntry] = JSON.parse(line)
-      const entry = JSON.parse(rawEntry)
+      let nextCursor, rawEntry, entry
+      try {
+        ;[nextCursor, rawEntry] = JSON.parse(line)
+        entry = JSON.parse(rawEntry)
+      } catch (e) {
+        core.warning(`tail: failed to parse ${line}`)
+        return
+      }
 
       if (['err', 'omg'].includes(entry.type)) {
         core.error(entry.msg.trim())
