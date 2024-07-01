@@ -21,9 +21,16 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
       })
     )
 
-    const lines = (await response.readBody()).split('\n')
+    const text = await response.readBody()
 
-    if (lines.trim().length === 0) {
+    if (text.trim().length === 0) {
+      core.warning('tail: no parsable logs, skipping sorry :/')
+      return
+    }
+
+    const lines = text.split('\n')
+
+    if (lines.length === 0) {
       core.warning('tail: no logs, skipping sorry :/')
       return
     }
