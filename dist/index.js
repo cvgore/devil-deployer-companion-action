@@ -24968,9 +24968,15 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 }
 
 async function run() {
-  const secretKey = core.getInput('secretKey')
-  const appName = core.getInput('appName')
-  const baseUrl = core.getInput('url')
+  const secretKey = core.getInput('secretKey', {
+    required: true,
+    trimWhitespace: true
+  })
+  const appName = core.getInput('appName', {
+    required: true,
+    trimWhitespace: true
+  })
+  const baseUrl = core.getInput('url', { required: true, trimWhitespace: true })
   const url = new URL(baseUrl)
   url.searchParams.set('action', 'deploy')
 
