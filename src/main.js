@@ -11,14 +11,17 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
   while (status === null) {
     url.searchParams.set('action', 'deploymentStatus')
-    const response = await client.postJson(url.toString(), {
-      appName,
-      secretKey,
-      deploymentId,
-      cursor
-    })
+    const response = await client.post(
+      url.toString(),
+      JSON.stringify({
+        appName,
+        secretKey,
+        deploymentId,
+        cursor
+      })
+    )
 
-    const lines = response.result.split('\n')
+    const lines = (await response.readBody()).split('\n')
 
     for (const line of lines) {
       const [nextCursor, rawEntry] = JSON.parse(line)
