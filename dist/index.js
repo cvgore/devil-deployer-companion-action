@@ -24956,6 +24956,7 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
       return
     }
 
+    let loggedAtLeastOne = false
     for (const line of lines) {
       core.debug(`tail: recv ${line}`)
       let nextCursor, rawEntry, entry
@@ -24963,7 +24964,11 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
         ;[nextCursor, rawEntry] = JSON.parse(line)
         entry = JSON.parse(rawEntry)
       } catch (e) {
-        core.warning(`tail: failed to parse ${line}`)
+        if (!loggedAtLeastOne) {
+          core.error(`tail: failed to parse logs: ${line}`)
+        } else {
+          core.info(`tail: no more logs ${line}`)
+        }
         return
       }
 
@@ -24986,6 +24991,7 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
       core.debug(`tail: cursor will be ${nextCursor}`)
       cursor = nextCursor
+      loggedAtLeastOne = true
     }
 
     await sleep(1000)
