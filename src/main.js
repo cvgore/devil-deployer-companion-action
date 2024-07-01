@@ -24,24 +24,28 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
     const lines = (await response.readBody()).split('\n')
 
     for (const line of lines) {
+      core.debug(`tail: recv ${line}`)
       const [nextCursor, rawEntry] = JSON.parse(line)
       const entry = JSON.parse(rawEntry)
 
       if (['err', 'omg'].includes(entry.type)) {
-        core.error(entry.msg)
+        core.error(entry.msg.trim())
       } else if (entry.type === 'inf') {
-        core.info(entry.msg)
+        core.info(entry.msg.trim())
+      } else if (entry.type === 'wrn') {
+        core.warning(entry.msg.trim())
       } else if (entry.type === 'DED') {
-        core.error(entry.msg)
-        core.setFailed(entry.msg)
+        core.error(entry.msg.trim())
+        core.setFailed(entry.msg.trim())
         status = 'fail'
         break
       } else if (entry.type === 'OKI') {
-        core.info(entry.msg)
+        core.info(entry.msg.trim())
         status = 'ok'
         break
       }
 
+      core.debug(`tail: cursor will be ${nextCursor}`)
       cursor = nextCursor
     }
 
