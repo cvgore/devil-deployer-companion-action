@@ -24974,7 +24974,7 @@ async function run() {
   const url = new URL(baseUrl)
   url.searchParams.set('action', 'deploy')
 
-  const client = new http.HttpClient()
+  const client = new http.HttpClient('devil-deployer-companion-action/main')
 
   core.debug(`connecting to ${baseUrl}`)
   const response = await client.postJson(url.toString(), {
