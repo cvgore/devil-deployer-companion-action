@@ -1,18 +1,17 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'devil-deployer-companion-action'
+description: 'devil-deployer-companion-action'
+author: 'cvgore'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  appName:
+    description: 'appName'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  secretKey:
+    description: 'secretKey'
+    required: true
+  url:
+    description: 'url'
+    required: true
 
 runs:
   using: node20
