@@ -24945,39 +24945,41 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
     const text = await response.readBody()
 
     if (text.trim().length === 0) {
-      core.warning('tail: no parsable logs, skipping sorry :/')
+      core.debug('tail: waiting for logs')
       return
     }
 
     const lines = text.split('\n')
 
     if (lines.length === 0) {
-      core.warning('tail: no logs, skipping sorry :/')
+      core.debug('tail: waiting for logs')
       return
     }
 
-    let loggedAtLeastOne = false
     for (const line of lines) {
-      core.debug(`tail: recv ${line}`)
       let nextCursor, rawEntry, entry
       try {
         ;[nextCursor, rawEntry] = JSON.parse(line)
         entry = JSON.parse(rawEntry)
       } catch (e) {
-        if (!loggedAtLeastOne) {
-          core.error(`tail: failed to parse logs: ${line}`)
-        } else {
-          core.info(`tail: no more logs ${line}`)
-        }
-        return
+        core.debug(
+          'tail: invalid log entry recv, retrying soon (might be normal due to no new logs)'
+        )
+        await sleep(1000)
+        break
+      }
+
+      if (nextCursor === -1) {
+        core.info('tail: EOF')
+        break
       }
 
       if (['err', 'omg'].includes(entry.type)) {
         core.error(entry.msg.trim())
       } else if (entry.type === 'inf') {
         core.info(entry.msg.trim())
-      } else if (entry.type === 'wrn') {
-        core.warning(entry.msg.trim())
+      } else if (entry.type === 'not') {
+        core.notice(entry.msg.trim())
       } else if (entry.type === 'DED') {
         core.error(entry.msg.trim())
         core.setFailed(entry.msg.trim())
@@ -24991,7 +24993,6 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
       core.debug(`tail: cursor will be ${nextCursor}`)
       cursor = nextCursor
-      loggedAtLeastOne = true
     }
 
     await sleep(1000)
