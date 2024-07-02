@@ -25,14 +25,16 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
     if (text.trim().length === 0) {
       core.debug('tail: waiting for logs')
-      break
+      await sleep(1000)
+      continue
     }
 
     const lines = text.split('\n')
 
     if (lines.length === 0) {
       core.debug('tail: waiting for logs')
-      break
+      await sleep(1000)
+      continue
     }
 
     for (const line of lines) {
@@ -44,13 +46,7 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
         core.debug(
           'tail: invalid log entry recv, retrying soon (might be normal due to no new logs)'
         )
-        await sleep(1000)
         break
-      }
-
-      if (nextCursor === -1) {
-        core.info('tail: EOF')
-        return
       }
 
       if (['err', 'omg'].includes(entry.type)) {
