@@ -25,14 +25,14 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
     if (text.trim().length === 0) {
       core.debug('tail: waiting for logs')
-      return
+      break
     }
 
     const lines = text.split('\n')
 
     if (lines.length === 0) {
       core.debug('tail: waiting for logs')
-      return
+      break
     }
 
     for (const line of lines) {
@@ -50,7 +50,7 @@ async function tailDeployStatus(client, url, appName, secretKey, deploymentId) {
 
       if (nextCursor === -1) {
         core.info('tail: EOF')
-        break
+        return
       }
 
       if (['err', 'omg'].includes(entry.type)) {
